@@ -1,0 +1,25 @@
+<html>
+	<title>Youtube music queue</title>
+	<body>
+		<h1>Blah</h1>
+		Youtube URL
+		<form name="Add" action="{{ url_for('index') }}" method="POST">
+			<input type="text" name="yourl">
+			<input type="submit" name="submit" value="submit">
+		</form>
+		<form name="Remove" action="{{ url_for('index') }}" method="POST">
+		Current Queue: <br>
+		<select name="queue" size="5" style="width: 200px">
+			{% for item in q %}
+				{% if item.status == "new" %}
+					<option value = {{item.url}}>new: {{item.url}}</option>
+				{% else %}
+					<option value = {{item.url}}>being used: {{item.url}}</option>
+				{% endif %}
+			{% endfor %}
+		</select>
+		<br />
+		<input type="submit" name="remove" value="remove">
+		</form>
+	</body>
+</html>
