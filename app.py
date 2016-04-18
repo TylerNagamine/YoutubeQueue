@@ -8,12 +8,14 @@ import time
 
 app = Flask(__name__)
 
+#Structure for holding data in the queue
 class qobj():
     def __init__(self, status, url, title):
         self.status = status
         self.url = url
         self.title = title
 
+# Main page.  Does most of the work
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -27,6 +29,7 @@ def index():
                     q.remove(cur)
     return render_template('index.html', q=q)
 
+# Two routes I used for testing
 @app.route('/add/<address>')
 def embed(address):
     address = "http://www.youtube.com/embed/" + address
@@ -39,10 +42,15 @@ def tester():
         print(str(c))
     return redirect(url_for('index'))
 
-
+# Flask function to pass to thread
 def RunFlask():
     app.run(debug=False, host='0.0.0.0')
 
+# Worker role for the thread.
+# For now, opens a new instance of VLC
+# media player with the given URL
+# ToDo: Figure out VLC Python API
+# on RBP
 def RunWorker():
     vlc = 0
     while True:
@@ -51,7 +59,9 @@ def RunWorker():
             #q.pop(0)
             if vlc == 0:
                 vlc = StartVLC(str(q[0].url))
+                # Set status so the site can show it's playing
                 q[0].status = "playing"
+                # Wait for it to close, then remove from queue
                 vlc.wait()
                 q.pop(0)
             elif vlc.poll != None:
@@ -64,10 +74,14 @@ def RunWorker():
 def StartVLC(url):
     vlc = subprocess.Popen(["cvlc", "--vout=none", "--play-and-exit", url])
     return vlc
+
+# Playing with trying to not open a new VLC every tmie
+# Big bottleneck 
 def EnqueueVLC(url):
     vlc = os.system("vlc --vout=none --one-instance --playlist-enqueue \"" + url + "\"")
     return vlc
 
+# Main; start threads
 if __name__ == '__main__':
     q = [] 
     #app.run(debug=True, host='0.0.0.0')
