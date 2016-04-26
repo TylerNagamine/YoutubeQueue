@@ -4,7 +4,7 @@ from threading import Thread
 import subprocess
 import os
 import time
-#import lxml
+import vlc
 
 app = Flask(__name__)
 
@@ -81,9 +81,34 @@ def EnqueueVLC(url):
     vlc = os.system("vlc --vout=none --one-instance --playlist-enqueue \"" + url + "\"")
     return vlc
 
+# Playing with the VLC bindings.
+# Library problem with RBP, or using bindings wrong?
+# Video starts playing but stops immediately
+def TestVLC():
+    media = "https://www.youtube.com/watch?v=wgxzQVGkTHk"
+    media2 = "https://www.youtube.com/watch?v=2igVmtKtaWk"
+    
+    instance = vlc.Instance()
+    player = instance.media_player_new()
+    print(vlc.libvlc_media_player_get_state(player))
+    player.set_mrl(media2)
+    print(player.get_title())
+    player.play()
+
+    
+
+    c = 0
+    while c < 40:
+        print(str(c),)
+        print(vlc.libvlc_media_player_get_state(player))
+        time.sleep(1)
+        c += 1
+
+
 # Main; start threads
 if __name__ == '__main__':
-    q = [] 
+    q = []
+    #TestVLC()
     #app.run(debug=True, host='0.0.0.0')
     
     #commands = Queue()
